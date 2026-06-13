@@ -20,6 +20,13 @@ function(vlk_get_header_version)
         message(FATAL_ERROR "Couldn't find vulkan_core.h!")
     endif()
 
+    # The project version is derived from VK_HEADER_VERSION below. Register the
+    # header as a configure dependency so bumping the Vulkan-Headers source
+    # re-runs CMake and regenerates VulkanHeadersConfigVersion.cmake; otherwise
+    # the version file goes stale and downstream find_package(VulkanHeaders <ver>)
+    # (e.g. Vulkan-Loader) silently fails its version check.
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${vulkan_core_header_file})
+
     file(READ ${vulkan_core_header_file} ver)
 
     if (ver MATCHES "#define[ ]+VK_HEADER_VERSION_COMPLETE[ ]+VK_MAKE_API_VERSION\\([ ]*[0-9]+,[ ]*([0-9]+),[ ]*([0-9]+),[ ]*VK_HEADER_VERSION[ ]*\\)")
